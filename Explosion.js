@@ -7,14 +7,18 @@ class Explosion {
     }
   
     update() {
-      this.life--;
+      this.life = max(0, this.life - 1); // prevent negatives
     }
   
     display() {
-      let alpha = map(this.life, 0, this.maxLife, 0, 255);
+      const alpha = map(this.life, 0, this.maxLife, 0, 255);
+      const radius = map(this.life, 0, this.maxLife, 50, 10);
+  
+      if (!isFinite(alpha) || !isFinite(radius)) return;
+  
       fill(255, 100, 0, alpha);
       noStroke();
-      ellipse(this.x, this.y, map(this.life, 0, this.maxLife, 50, 10));
+      ellipse(this.x, this.y, radius);
     }
   
     isFinished() {
