@@ -6,11 +6,16 @@ let projectiles = [];
 let powerUps = [];
 let gameManager;
 
+
 function setup() {
-  createCanvas(800, 600);
-  player = new Player();
-  gameManager = new GameManager();
-}
+    createCanvas(windowWidth, windowHeight);
+    player = new Player();
+    gameManager = new GameManager();
+  }
+  
+  function windowResized() {
+    resizeCanvas(windowWidth, windowHeight);
+  }
 
 function draw() {
   background(0);
