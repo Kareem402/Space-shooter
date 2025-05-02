@@ -1,7 +1,7 @@
 class GameManager {
     constructor(difficulty) {
       this.spawnTimer = 0;
-      this.powerUpTimer = 0; // NEW: separate timer for power-ups
+      this.powerUpTimer = 0; // NEW: power-up timer
   
       switch (difficulty) {
         case "easy":
@@ -19,19 +19,19 @@ class GameManager {
     }
   
     update() {
-      // === Enemy Spawning ===
+      // === ENEMY SPAWNING ===
       this.spawnTimer++;
       if (this.spawnTimer % this.spawnRate === 0) {
-        let type = random([Enemy, FastEnemy, ZigzagEnemy]);
+        const type = random([Enemy, FastEnemy, ZigzagEnemy]);
         enemies.push(new type(random(width - 30), 0));
       }
   
-      // === Power-Up Spawning ===
+      // === POWER-UP SPAWNING ===
       this.powerUpTimer++;
-      if (this.powerUpTimer % 180 === 0) { // every 3 seconds
-        const powerTypes = ["health"]; // add more later: "shield", "rapid", etc.
-        const chosenType = random(powerTypes);
-        powerUps.push(new PowerUp(random(width - 30), 0, chosenType));
+      if (this.powerUpTimer % 180 === 0) {
+        const powerTypes = ["health", "shield", "rapid"];
+        const selected = random(powerTypes);
+        powerUps.push(new PowerUp(random(width - 30), 0, selected));
       }
     }
   }  

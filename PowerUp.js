@@ -41,10 +41,10 @@ class PowerUp {
         player._health = min(player.maxHealth, player._health + 20);
       } else if (this.type === "shield") {
         player.shieldActive = true;
-        player.shieldTimer = 300; // 5 seconds
+        player.shieldTimer = 300;
       } else if (this.type === "rapid") {
         player.rapidFire = true;
-        player.rapidTimer = 300; // 5 seconds
+        player.rapidTimer = 300;
       }
     }
   }  

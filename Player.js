@@ -6,16 +6,26 @@ class Player {
       this.height = 20;
       this._health = 100;
       this.maxHealth = 100;
+      this.shieldActive = false;
+      this.shieldTimer = 0;
+      this.rapidFire = false;
+      this.rapidTimer = 0;
+      this.lastShot = 0;
     }
   
     update() {
       if (keyIsDown(LEFT_ARROW)) this.x -= 7;
       if (keyIsDown(RIGHT_ARROW)) this.x += 7;
       this.x = constrain(this.x, 0, width - this.width);
+  
+      if (this.rapidFire && frameCount - this.lastShot > 5 && keyIsDown(32)) {
+        this.shoot();
+        this.lastShot = frameCount;
+      }
     }
   
     display() {
-      fill(0, 255, 0);
+      fill(this.shieldActive ? color(0, 255, 255) : color(0, 255, 0));
       rect(this.x, this.y, this.width, this.height);
   
       let barWidth = 200;
@@ -35,7 +45,9 @@ class Player {
     }
   
     shoot() {
+      if (!this.rapidFire && frameCount - this.lastShot < 20) return;
       projectiles.push(new Projectile(this.x + this.width / 2, this.y));
+      this.lastShot = frameCount;
     }
   
     get health() {
@@ -45,4 +57,5 @@ class Player {
     takeDamage(amount) {
       this._health = max(0, this._health - amount);
     }
-  }  
+  }
+  

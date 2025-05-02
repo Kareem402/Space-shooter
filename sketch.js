@@ -34,10 +34,22 @@ function draw() {
     return;
   }
 
+  // Update active power-up timers
+  if (player.shieldActive) {
+    player.shieldTimer--;
+    if (player.shieldTimer <= 0) player.shieldActive = false;
+  }
+
+  if (player.rapidFire) {
+    player.rapidTimer--;
+    if (player.rapidTimer <= 0) player.rapidFire = false;
+  }
+
   gameManager.update();
   player.update();
   player.display();
 
+  // === ENEMIES ===
   for (let i = enemies.length - 1; i >= 0; i--) {
     let enemy = enemies[i];
     enemy.update();
@@ -45,15 +57,19 @@ function draw() {
 
     if (enemy.y + 30 > height) {
       enemies.splice(i, 1);
-      player.takeDamage(20);
+      if (!player.shieldActive) {
+        player.takeDamage(20);
+      }
     }
   }
 
+  // === PROJECTILES ===
   for (let bullet of projectiles) {
     bullet.update();
     bullet.display();
   }
 
+  // === POWER-UPS ===
   for (let i = powerUps.length - 1; i >= 0; i--) {
     let p = powerUps[i];
     p.update();
@@ -65,6 +81,7 @@ function draw() {
     }
   }
 
+  // === COLLISIONS: BULLETS vs ENEMIES ===
   for (let i = projectiles.length - 1; i >= 0; i--) {
     let bullet = projectiles[i];
     for (let j = enemies.length - 1; j >= 0; j--) {
@@ -82,6 +99,7 @@ function draw() {
     }
   }
 
+  // === GAME OVER ===
   if (player.health <= 0) {
     gameOver = true;
   }
