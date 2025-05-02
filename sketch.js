@@ -54,9 +54,15 @@ function draw() {
     bullet.display();
   }
 
-  for (let p of powerUps) {
+  for (let i = powerUps.length - 1; i >= 0; i--) {
+    let p = powerUps[i];
     p.update();
     p.display();
+
+    if (p.isCollected(player)) {
+      p.applyEffect(player);
+      powerUps.splice(i, 1);
+    }
   }
 
   for (let i = projectiles.length - 1; i >= 0; i--) {
