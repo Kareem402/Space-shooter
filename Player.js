@@ -18,7 +18,7 @@ class Player {
       fill(0, 255, 0);
       rect(this.x, this.y, this.width, this.height);
   
-      // Animated Health Bar
+      // === Animated Health Bar ===
       let barWidth = 200;
       let barHeight = 20;
       let healthRatio = this._health / this.maxHealth;

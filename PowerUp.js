@@ -14,5 +14,4 @@ class PowerUp {
       fill(0, 0, 255);
       ellipse(this.x, this.y, this.size);
     }
-  }
-  
+  }  
