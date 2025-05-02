@@ -2,6 +2,7 @@ let player;
 let enemies = [];
 let projectiles = [];
 let powerUps = [];
+let fadingEnemies = [];
 let gameManager;
 let gameOver = false;
 let gameStarted = false;
@@ -121,7 +122,7 @@ function draw() {
     }
   }
 
-  // === Bullet-Enemy Collisions (no explosions) ===
+  // === Bullet-Enemy Collisions (Fade-out effect) ===
   let bulletsToRemove = [];
   let enemiesToRemove = [];
 
@@ -137,6 +138,13 @@ function draw() {
         bullet.y >= enemy.y &&
         bullet.y <= enemy.y + 30
       ) {
+        fadingEnemies.push({
+          x: enemies[j].x,
+          y: enemies[j].y,
+          size: 30,
+          alpha: 255
+        });
+
         bulletsToRemove.push(i);
         enemiesToRemove.push(j);
         break;
@@ -150,6 +158,20 @@ function draw() {
 
   for (let i = enemiesToRemove.length - 1; i >= 0; i--) {
     enemies.splice(enemiesToRemove[i], 1);
+  }
+
+  // === Fading Enemies Animation ===
+  for (let i = fadingEnemies.length - 1; i >= 0; i--) {
+    let e = fadingEnemies[i];
+    e.alpha -= 10;
+    e.size *= 0.9;
+
+    if (e.alpha <= 0 || e.size <= 1) {
+      fadingEnemies.splice(i, 1);
+    } else {
+      fill(255, 0, 0, e.alpha);
+      rect(e.x, e.y, e.size, e.size);
+    }
   }
 
   // === Game Over ===
@@ -191,6 +213,7 @@ function startGame(level) {
   enemies = [];
   projectiles = [];
   powerUps = [];
+  fadingEnemies = [];
   gameManager = new GameManager(difficulty);
   gameStarted = true;
   gameOver = false;
@@ -204,4 +227,5 @@ function returnToMenu() {
   enemies = [];
   projectiles = [];
   powerUps = [];
+  fadingEnemies = [];
 }
