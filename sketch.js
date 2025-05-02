@@ -9,13 +9,23 @@ let gameStarted = false;
 let difficulty = null;
 let bgm;
 let isMuted = false;
+let bgmLoaded = false;
 
 let stars = [];
 const numStars = 100;
 
 function preload() {
   soundFormats('mp3', 'wav');
-  bgm = loadSound('bgm.mp3');
+  bgm = loadSound('bgm.mp3',
+    () => {
+      console.log("✅ BGM loaded");
+      bgmLoaded = true;
+    },
+    (err) => {
+      console.error("❌ Failed to load BGM:", err);
+      bgmLoaded = false;
+    }
+  );
 }
 
 function setup() {
@@ -31,10 +41,9 @@ function setup() {
     });
   }
 
-  // Mute button listener
   const muteBtn = document.getElementById("muteBtn");
   muteBtn.addEventListener("click", () => {
-    if (bgm) {
+    if (bgmLoaded && bgm) {
       isMuted = !isMuted;
       bgm.setVolume(isMuted ? 0 : 0.4);
       muteBtn.textContent = isMuted ? "🔇 Unmute" : "🔊 Mute";
@@ -49,6 +58,14 @@ function windowResized() {
 function draw() {
   background(0);
   noStroke();
+
+  if (!bgmLoaded) {
+    fill(255);
+    textAlign(CENTER, CENTER);
+    textSize(24);
+    text("Loading BGM...", width / 2, height / 2);
+    return;
+  }
 
   for (let star of stars) {
     fill(255);
@@ -75,7 +92,6 @@ function draw() {
     return;
   }
 
-  // Power-up timers
   if (player.shieldActive) {
     player.shieldTimer--;
     if (player.shieldTimer <= 0) player.shieldActive = false;
@@ -106,7 +122,6 @@ function draw() {
     text("🔫 Rapid Fire Active", 20, statusY);
   }
 
-  // Enemies
   for (let i = enemies.length - 1; i >= 0; i--) {
     let enemy = enemies[i];
     enemy.update();
@@ -120,13 +135,11 @@ function draw() {
     }
   }
 
-  // Projectiles
   for (let bullet of projectiles) {
     bullet.update();
     bullet.display();
   }
 
-  // Power-Ups
   for (let i = powerUps.length - 1; i >= 0; i--) {
     let p = powerUps[i];
     p.update();
@@ -138,7 +151,6 @@ function draw() {
     }
   }
 
-  // Bullet-enemy collisions with fade-out
   let bulletsToRemove = [];
   let enemiesToRemove = [];
 
@@ -176,7 +188,6 @@ function draw() {
     enemies.splice(enemiesToRemove[i], 1);
   }
 
-  // Fading enemy animation
   for (let i = fadingEnemies.length - 1; i >= 0; i--) {
     let e = fadingEnemies[i];
     e.alpha -= 10;
@@ -233,7 +244,7 @@ function startGame(level) {
   gameStarted = true;
   gameOver = false;
 
-  if (bgm && !bgm.isPlaying()) {
+  if (bgmLoaded && !bgm.isPlaying()) {
     bgm.setLoop(true);
     bgm.setVolume(isMuted ? 0 : 0.4);
     bgm.play();
@@ -251,12 +262,11 @@ function returnToMenu() {
   powerUps = [];
   fadingEnemies = [];
 
-  if (bgm && bgm.isPlaying()) {
+  if (bgmLoaded && bgm.isPlaying()) {
     bgm.stop();
   }
 }
 
-// Browser audio unlock
 function mousePressed() {
   if (getAudioContext().state !== 'running') {
     getAudioContext().resume();
