@@ -1,4 +1,4 @@
-// === PHASE 1: INITIAL SETUP ===
+// Global variables and game loop logic
 
 let player;
 let enemies = [];
