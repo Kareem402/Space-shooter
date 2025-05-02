@@ -30,7 +30,7 @@ function draw() {
     textAlign(CENTER, CENTER);
     text("Game Over", width / 2, height / 2 - 40);
     textSize(20);
-    text("Press 'R' to restart", width / 2, height / 2);
+    text("Press 'R' to return to menu", width / 2, height / 2);
     return;
   }
 
@@ -100,8 +100,12 @@ function keyPressed() {
     return;
   }
 
+  if (gameOver && (key === 'r' || key === 'R')) {
+    returnToMenu();
+    return;
+  }
+
   if (key === ' ') player.shoot();
-  if (key === 'r' || key === 'R') restartGame();
 }
 
 function startGame(level) {
@@ -116,6 +120,11 @@ function startGame(level) {
   loop();
 }
 
-function restartGame() {
-  startGame(difficulty);
+function returnToMenu() {
+  gameStarted = false;
+  gameOver = false;
+  difficulty = null;
+  enemies = [];
+  projectiles = [];
+  powerUps = [];
 }
