@@ -10,6 +10,17 @@ let difficulty = null;
 let bgm;
 let isMuted = false;
 let bgmLoaded = false;
+let score = 0;
+let inShop = false;
+
+let unlockedSkins = [];
+let selectedSkin = 'green';
+const skinOptions = [
+  { color: 'green', threshold: 0 },
+  { color: 'blue', threshold: 200 },
+  { color: 'red', threshold: 500 },
+  { color: 'gold', threshold: 1000 }
+];
 
 let stars = [];
 const numStars = 100;
@@ -41,6 +52,9 @@ function setup() {
     });
   }
 
+  let saved = localStorage.getItem("unlockedSkins");
+  if (saved) unlockedSkins = JSON.parse(saved);
+
   const muteBtn = document.getElementById("muteBtn");
   muteBtn.addEventListener("click", () => {
     if (bgmLoaded && bgm) {
@@ -49,10 +63,6 @@ function setup() {
       muteBtn.textContent = isMuted ? "🔇 Unmute" : "🔊 Mute";
     }
   });
-}
-
-function windowResized() {
-  resizeCanvas(windowWidth, windowHeight);
 }
 
 function draw() {
@@ -78,7 +88,11 @@ function draw() {
   }
 
   if (!gameStarted) {
-    drawMainMenu();
+    if (inShop) {
+      drawShopMenu();
+    } else {
+      drawMainMenu();
+    }
     return;
   }
 
@@ -106,7 +120,7 @@ function draw() {
   player.update();
   player.display();
 
-  // HUD
+  // HUD (no top-right score anymore)
   textSize(16);
   textAlign(LEFT, TOP);
   let statusY = height - 60;
@@ -175,6 +189,7 @@ function draw() {
 
         bulletsToRemove.push(i);
         enemiesToRemove.push(j);
+        score += 10;
         break;
       }
     }
@@ -215,10 +230,50 @@ function drawMainMenu() {
   text("Press 1 for EASY", width / 2, height / 2 - 30);
   text("Press 2 for MEDIUM", width / 2, height / 2);
   text("Press 3 for HARD", width / 2, height / 2 + 30);
+  text("Press S to enter SHOP", width / 2, height / 2 + 80);
+}
+
+function drawShopMenu() {
+  background(0);
+  fill(255);
+  textAlign(CENTER, CENTER);
+  textSize(32);
+  text("🎨 SHOP — UNLOCK SKINS", width / 2, 80);
+  textSize(18);
+  text("Click a skin to equip it. Score to unlock.", width / 2, 120);
+
+  let startX = width / 2 - 200;
+  let startY = 200;
+
+  for (let i = 0; i < skinOptions.length; i++) {
+    let skin = skinOptions[i];
+    let x = startX + i * 100;
+    let y = startY;
+
+    fill(skin.color);
+    rect(x, y, 50, 50);
+
+    fill(255);
+    textSize(12);
+    textAlign(CENTER);
+    if (score >= skin.threshold || unlockedSkins.includes(skin.color)) {
+      text("UNLOCKED", x + 25, y + 70);
+    } else {
+      text(`LOCKED\n${skin.threshold} pts`, x + 25, y + 70);
+    }
+  }
+
+  fill(255);
+  text("Press B to go Back", width / 2, height - 60);
 }
 
 function keyPressed() {
   if (!gameStarted) {
+    if (key === 's' || key === 'S') {
+      inShop = true;
+    } else if (key === 'b' || key === 'B') {
+      inShop = false;
+    }
     if (key === '1') startGame("easy");
     if (key === '2') startGame("medium");
     if (key === '3') startGame("hard");
@@ -240,6 +295,7 @@ function startGame(level) {
   projectiles = [];
   powerUps = [];
   fadingEnemies = [];
+  score = 0;
   gameManager = new GameManager(difficulty);
   gameStarted = true;
   gameOver = false;
@@ -268,6 +324,32 @@ function returnToMenu() {
 }
 
 function mousePressed() {
+  if (!gameStarted && inShop) {
+    let startX = width / 2 - 200;
+    let startY = 200;
+
+    for (let i = 0; i < skinOptions.length; i++) {
+      let skin = skinOptions[i];
+      let x = startX + i * 100;
+      let y = startY;
+
+      if (
+        mouseX >= x &&
+        mouseX <= x + 50 &&
+        mouseY >= y &&
+        mouseY <= y + 50
+      ) {
+        if (score >= skin.threshold || unlockedSkins.includes(skin.color)) {
+          selectedSkin = skin.color;
+          if (!unlockedSkins.includes(skin.color)) {
+            unlockedSkins.push(skin.color);
+            localStorage.setItem("unlockedSkins", JSON.stringify(unlockedSkins));
+          }
+        }
+      }
+    }
+  }
+
   if (getAudioContext().state !== 'running') {
     getAudioContext().resume();
   }
