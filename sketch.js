@@ -2,13 +2,12 @@ let player;
 let enemies = [];
 let projectiles = [];
 let powerUps = [];
-let explosions = [];
 let gameManager;
 let gameOver = false;
 let gameStarted = false;
 let difficulty = null;
 
-// === Starfield Background ===
+// === Starfield ===
 let stars = [];
 const numStars = 100;
 
@@ -31,9 +30,9 @@ function windowResized() {
 }
 
 function draw() {
-  // === Starfield Background ===
   background(0);
   noStroke();
+
   for (let star of stars) {
     fill(255);
     circle(star.x, star.y, star.size);
@@ -74,7 +73,7 @@ function draw() {
   player.update();
   player.display();
 
-  // === HUD: Show Active Power-Ups ===
+  // === HUD ===
   textSize(16);
   textAlign(LEFT, TOP);
   let statusY = height - 60;
@@ -122,7 +121,7 @@ function draw() {
     }
   }
 
-  // === Bullet-Enemy Collisions (safe + stable) ===
+  // === Bullet-Enemy Collisions (no explosions) ===
   let bulletsToRemove = [];
   let enemiesToRemove = [];
 
@@ -138,7 +137,6 @@ function draw() {
         bullet.y >= enemy.y &&
         bullet.y <= enemy.y + 30
       ) {
-        explosions.push(new Explosion(enemy.x + 15, enemy.y + 15));
         bulletsToRemove.push(i);
         enemiesToRemove.push(j);
         break;
@@ -149,17 +147,9 @@ function draw() {
   for (let i = bulletsToRemove.length - 1; i >= 0; i--) {
     projectiles.splice(bulletsToRemove[i], 1);
   }
+
   for (let i = enemiesToRemove.length - 1; i >= 0; i--) {
     enemies.splice(enemiesToRemove[i], 1);
-  }
-
-  // === Explosion Rendering ===
-  for (let i = explosions.length - 1; i >= 0; i--) {
-    explosions[i].update();
-    explosions[i].display();
-    if (explosions[i].isFinished()) {
-      explosions.splice(i, 1);
-    }
   }
 
   // === Game Over ===
@@ -201,7 +191,6 @@ function startGame(level) {
   enemies = [];
   projectiles = [];
   powerUps = [];
-  explosions = [];
   gameManager = new GameManager(difficulty);
   gameStarted = true;
   gameOver = false;
@@ -215,5 +204,4 @@ function returnToMenu() {
   enemies = [];
   projectiles = [];
   powerUps = [];
-  explosions = [];
 }
