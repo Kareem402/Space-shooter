@@ -7,9 +7,9 @@ let gameManager;
 let gameOver = false;
 let gameStarted = false;
 let difficulty = null;
-let bgm; // 🔊 Background music
+let bgm;
+let isMuted = false;
 
-// === Starfield ===
 let stars = [];
 const numStars = 100;
 
@@ -30,6 +30,16 @@ function setup() {
       speed: random(0.5, 2)
     });
   }
+
+  // Mute button listener
+  const muteBtn = document.getElementById("muteBtn");
+  muteBtn.addEventListener("click", () => {
+    if (bgm) {
+      isMuted = !isMuted;
+      bgm.setVolume(isMuted ? 0 : 0.4);
+      muteBtn.textContent = isMuted ? "🔇 Unmute" : "🔊 Mute";
+    }
+  });
 }
 
 function windowResized() {
@@ -65,7 +75,7 @@ function draw() {
     return;
   }
 
-  // === Power-up Timers ===
+  // Power-up timers
   if (player.shieldActive) {
     player.shieldTimer--;
     if (player.shieldTimer <= 0) player.shieldActive = false;
@@ -80,7 +90,7 @@ function draw() {
   player.update();
   player.display();
 
-  // === HUD ===
+  // HUD
   textSize(16);
   textAlign(LEFT, TOP);
   let statusY = height - 60;
@@ -96,7 +106,7 @@ function draw() {
     text("🔫 Rapid Fire Active", 20, statusY);
   }
 
-  // === Enemies ===
+  // Enemies
   for (let i = enemies.length - 1; i >= 0; i--) {
     let enemy = enemies[i];
     enemy.update();
@@ -110,13 +120,13 @@ function draw() {
     }
   }
 
-  // === Projectiles ===
+  // Projectiles
   for (let bullet of projectiles) {
     bullet.update();
     bullet.display();
   }
 
-  // === Power-Ups ===
+  // Power-Ups
   for (let i = powerUps.length - 1; i >= 0; i--) {
     let p = powerUps[i];
     p.update();
@@ -128,7 +138,7 @@ function draw() {
     }
   }
 
-  // === Bullet-Enemy Collisions (Fade-out effect) ===
+  // Bullet-enemy collisions with fade-out
   let bulletsToRemove = [];
   let enemiesToRemove = [];
 
@@ -166,7 +176,7 @@ function draw() {
     enemies.splice(enemiesToRemove[i], 1);
   }
 
-  // === Fading Enemies Animation ===
+  // Fading enemy animation
   for (let i = fadingEnemies.length - 1; i >= 0; i--) {
     let e = fadingEnemies[i];
     e.alpha -= 10;
@@ -180,7 +190,6 @@ function draw() {
     }
   }
 
-  // === Game Over ===
   if (player.health <= 0) {
     gameOver = true;
   }
@@ -224,9 +233,9 @@ function startGame(level) {
   gameStarted = true;
   gameOver = false;
 
-  if (!bgm.isPlaying()) {
+  if (bgm && !bgm.isPlaying()) {
     bgm.setLoop(true);
-    bgm.setVolume(0.5);
+    bgm.setVolume(isMuted ? 0 : 0.4);
     bgm.play();
   }
 
@@ -242,7 +251,14 @@ function returnToMenu() {
   powerUps = [];
   fadingEnemies = [];
 
-  if (bgm.isPlaying()) {
+  if (bgm && bgm.isPlaying()) {
     bgm.stop();
+  }
+}
+
+// Browser audio unlock
+function mousePressed() {
+  if (getAudioContext().state !== 'running') {
+    getAudioContext().resume();
   }
 }
