@@ -1,9 +1,9 @@
-// === PHASE 1: GLOBAL SETUP ===
 let player;
 let enemies = [];
 let projectiles = [];
 let powerUps = [];
 let gameManager;
+let gameOver = false;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -15,15 +15,23 @@ function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
 }
 
-// === PHASE 2: MAIN DRAW LOOP ===
 function draw() {
   background(0);
+
+  if (gameOver) {
+    fill(255);
+    textSize(40);
+    textAlign(CENTER, CENTER);
+    text("Game Over", width / 2, height / 2 - 40);
+    textSize(20);
+    text("Press 'R' to restart", width / 2, height / 2);
+    return;
+  }
 
   gameManager.update();
   player.update();
   player.display();
 
-  // === DAMAGE IF ENEMY REACHES BOTTOM ===
   for (let i = enemies.length - 1; i >= 0; i--) {
     let enemy = enemies[i];
     enemy.update();
@@ -45,7 +53,6 @@ function draw() {
     p.display();
   }
 
-  // === COLLISION: BULLET vs ENEMY ===
   for (let i = projectiles.length - 1; i >= 0; i--) {
     let bullet = projectiles[i];
     for (let j = enemies.length - 1; j >= 0; j--) {
@@ -63,16 +70,22 @@ function draw() {
     }
   }
 
-  // === GAME OVER ===
   if (player.health <= 0) {
-    noLoop();
-    fill(255);
-    textSize(40);
-    textAlign(CENTER, CENTER);
-    text("Game Over", width / 2, height / 2);
+    gameOver = true;
   }
 }
 
 function keyPressed() {
   if (key === ' ') player.shoot();
+  if (key === 'r' || key === 'R') restartGame();
+}
+
+function restartGame() {
+  player = new Player();
+  enemies = [];
+  projectiles = [];
+  powerUps = [];
+  gameManager = new GameManager();
+  gameOver = false;
+  loop();
 }
