@@ -9,8 +9,8 @@ class Player {
     }
   
     update() {
-      if (keyIsDown(LEFT_ARROW)) this.x -= 5;
-      if (keyIsDown(RIGHT_ARROW)) this.x += 5;
+      if (keyIsDown(LEFT_ARROW)) this.x -= 7;  // Faster movement
+      if (keyIsDown(RIGHT_ARROW)) this.x += 7;
       this.x = constrain(this.x, 0, width - this.width);
     }
   
@@ -18,7 +18,6 @@ class Player {
       fill(0, 255, 0);
       rect(this.x, this.y, this.width, this.height);
   
-      // === Animated Health Bar ===
       let barWidth = 200;
       let barHeight = 20;
       let healthRatio = this._health / this.maxHealth;
