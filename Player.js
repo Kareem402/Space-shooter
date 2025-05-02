@@ -9,7 +9,7 @@ class Player {
     }
   
     update() {
-      if (keyIsDown(LEFT_ARROW)) this.x -= 7;  // Faster movement
+      if (keyIsDown(LEFT_ARROW)) this.x -= 7;
       if (keyIsDown(RIGHT_ARROW)) this.x += 7;
       this.x = constrain(this.x, 0, width - this.width);
     }
@@ -25,7 +25,6 @@ class Player {
   
       fill(80);
       rect(20, 20, barWidth, barHeight, 10);
-  
       fill(fillColor);
       rect(20, 20, barWidth * healthRatio, barHeight, 10);
   

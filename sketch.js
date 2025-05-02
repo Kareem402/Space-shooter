@@ -4,11 +4,12 @@ let projectiles = [];
 let powerUps = [];
 let gameManager;
 let gameOver = false;
+let gameStarted = false;
+let difficulty = null;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
-  player = new Player();
-  gameManager = new GameManager();
+  textFont("monospace");
 }
 
 function windowResized() {
@@ -17,6 +18,11 @@ function windowResized() {
 
 function draw() {
   background(0);
+
+  if (!gameStarted) {
+    drawMainMenu();
+    return;
+  }
 
   if (gameOver) {
     fill(255);
@@ -75,17 +81,41 @@ function draw() {
   }
 }
 
+function drawMainMenu() {
+  fill(255);
+  textAlign(CENTER, CENTER);
+  textSize(36);
+  text("SPACE SHOOTER", width / 2, height / 2 - 100);
+  textSize(24);
+  text("Press 1 for EASY", width / 2, height / 2 - 30);
+  text("Press 2 for MEDIUM", width / 2, height / 2);
+  text("Press 3 for HARD", width / 2, height / 2 + 30);
+}
+
 function keyPressed() {
+  if (!gameStarted) {
+    if (key === '1') startGame("easy");
+    if (key === '2') startGame("medium");
+    if (key === '3') startGame("hard");
+    return;
+  }
+
   if (key === ' ') player.shoot();
   if (key === 'r' || key === 'R') restartGame();
 }
 
-function restartGame() {
+function startGame(level) {
+  difficulty = level;
   player = new Player();
   enemies = [];
   projectiles = [];
   powerUps = [];
-  gameManager = new GameManager();
+  gameManager = new GameManager(difficulty);
+  gameStarted = true;
   gameOver = false;
   loop();
+}
+
+function restartGame() {
+  startGame(difficulty);
 }
