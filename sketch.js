@@ -31,9 +31,8 @@ function windowResized() {
 }
 
 function draw() {
+  // === Starfield Background ===
   background(0);
-
-  // === Starfield Animation ===
   noStroke();
   for (let star of stars) {
     fill(255);
@@ -60,6 +59,7 @@ function draw() {
     return;
   }
 
+  // === Power-up Timers ===
   if (player.shieldActive) {
     player.shieldTimer--;
     if (player.shieldTimer <= 0) player.shieldActive = false;
@@ -74,7 +74,7 @@ function draw() {
   player.update();
   player.display();
 
-  // === HUD ===
+  // === HUD: Show Active Power-Ups ===
   textSize(16);
   textAlign(LEFT, TOP);
   let statusY = height - 60;
@@ -98,7 +98,9 @@ function draw() {
 
     if (enemy.y + 30 > height) {
       enemies.splice(i, 1);
-      if (!player.shieldActive) player.takeDamage(20);
+      if (!player.shieldActive) {
+        player.takeDamage(20);
+      }
     }
   }
 
@@ -120,9 +122,11 @@ function draw() {
     }
   }
 
-  // === Collisions: Bullets vs Enemies ===
+  // === Bullet-Enemy Collisions (Safe version with explosions) ===
   for (let i = projectiles.length - 1; i >= 0; i--) {
     let bullet = projectiles[i];
+    let hit = false;
+
     for (let j = enemies.length - 1; j >= 0; j--) {
       let enemy = enemies[j];
       if (
@@ -131,15 +135,19 @@ function draw() {
         bullet.y >= enemy.y &&
         bullet.y <= enemy.y + 30
       ) {
-        explosions.push(new Explosion(enemy.x + 15, enemy.y + 15)); // 💥
+        explosions.push(new Explosion(enemy.x + 15, enemy.y + 15));
         enemies.splice(j, 1);
-        projectiles.splice(i, 1);
+        hit = true;
         break;
       }
     }
+
+    if (hit) {
+      projectiles.splice(i, 1);
+    }
   }
 
-  // === Explosions ===
+  // === Explosion Rendering ===
   for (let i = explosions.length - 1; i >= 0; i--) {
     explosions[i].update();
     explosions[i].display();
