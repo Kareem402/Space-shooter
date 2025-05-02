@@ -2,7 +2,7 @@ class PowerUp {
     constructor(x, y, type) {
       this.x = x;
       this.y = y;
-      this.type = type;
+      this.type = type; // "health", "shield", "rapid"
       this.size = 20;
     }
   
@@ -11,7 +11,21 @@ class PowerUp {
     }
   
     display() {
-      fill(0, 0, 255);
+      // Color code based on type
+      switch (this.type) {
+        case "health":
+          fill(0, 255, 0); // green
+          break;
+        case "shield":
+          fill(0, 0, 255); // blue
+          break;
+        case "rapid":
+          fill(255, 0, 0); // red
+          break;
+        default:
+          fill(255, 255, 0); // yellow fallback
+      }
+  
       ellipse(this.x, this.y, this.size);
     }
   
@@ -28,5 +42,6 @@ class PowerUp {
       if (this.type === "health") {
         player._health = min(player.maxHealth, player._health + 20);
       }
+      // future: add logic for "shield", "rapid"
     }
   }  
