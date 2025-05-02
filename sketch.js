@@ -122,13 +122,16 @@ function draw() {
     }
   }
 
-  // === Bullet-Enemy Collisions (Safe version with explosions) ===
-  for (let i = projectiles.length - 1; i >= 0; i--) {
-    let bullet = projectiles[i];
-    let hit = false;
+  // === Bullet-Enemy Collisions (safe + stable) ===
+  let bulletsToRemove = [];
+  let enemiesToRemove = [];
 
-    for (let j = enemies.length - 1; j >= 0; j--) {
+  for (let i = 0; i < projectiles.length; i++) {
+    let bullet = projectiles[i];
+
+    for (let j = 0; j < enemies.length; j++) {
       let enemy = enemies[j];
+
       if (
         bullet.x >= enemy.x &&
         bullet.x <= enemy.x + 30 &&
@@ -136,15 +139,18 @@ function draw() {
         bullet.y <= enemy.y + 30
       ) {
         explosions.push(new Explosion(enemy.x + 15, enemy.y + 15));
-        enemies.splice(j, 1);
-        hit = true;
+        bulletsToRemove.push(i);
+        enemiesToRemove.push(j);
         break;
       }
     }
+  }
 
-    if (hit) {
-      projectiles.splice(i, 1);
-    }
+  for (let i = bulletsToRemove.length - 1; i >= 0; i--) {
+    projectiles.splice(bulletsToRemove[i], 1);
+  }
+  for (let i = enemiesToRemove.length - 1; i >= 0; i--) {
+    enemies.splice(enemiesToRemove[i], 1);
   }
 
   // === Explosion Rendering ===
