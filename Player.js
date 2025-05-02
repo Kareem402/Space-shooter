@@ -16,7 +16,11 @@ class Player {
     display() {
       fill(0, 255, 0);
       rect(this.x, this.y, this.width, this.height);
-    }
+      fill(255);
+    textSize(20);
+    textAlign(LEFT, TOP);
+    text("Health: " + this._health, 10, 10);
+ }
   
     shoot() {
       projectiles.push(new Projectile(this.x + this.width / 2, this.y));
