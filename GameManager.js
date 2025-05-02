@@ -11,4 +11,4 @@ class GameManager {
         enemies.push(new type(random(width), 0));
       }
     }
-  }
+  }  

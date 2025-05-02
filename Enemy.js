@@ -33,5 +33,4 @@ class Enemy {
       if (this.x <= 0 || this.x >= width - 30) this.dir *= -1;
       this.y += 1.5;
     }
-  }
-  
+  }  
