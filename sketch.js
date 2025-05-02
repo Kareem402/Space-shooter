@@ -34,7 +34,7 @@ function draw() {
     return;
   }
 
-  // Update active power-up timers
+  // === Power-up timers ===
   if (player.shieldActive) {
     player.shieldTimer--;
     if (player.shieldTimer <= 0) player.shieldActive = false;
@@ -49,7 +49,23 @@ function draw() {
   player.update();
   player.display();
 
-  // === ENEMIES ===
+  // === HUD: Show active power-ups ===
+  textSize(16);
+  textAlign(LEFT, TOP);
+  let statusY = height - 60;
+
+  if (player.shieldActive) {
+    fill(0, 200, 255);
+    text("🛡️ Shield Active", 20, statusY);
+    statusY += 20;
+  }
+
+  if (player.rapidFire) {
+    fill(255, 100, 100);
+    text("🔫 Rapid Fire Active", 20, statusY);
+  }
+
+  // === Enemies ===
   for (let i = enemies.length - 1; i >= 0; i--) {
     let enemy = enemies[i];
     enemy.update();
@@ -63,13 +79,13 @@ function draw() {
     }
   }
 
-  // === PROJECTILES ===
+  // === Projectiles ===
   for (let bullet of projectiles) {
     bullet.update();
     bullet.display();
   }
 
-  // === POWER-UPS ===
+  // === Power-ups ===
   for (let i = powerUps.length - 1; i >= 0; i--) {
     let p = powerUps[i];
     p.update();
@@ -81,7 +97,7 @@ function draw() {
     }
   }
 
-  // === COLLISIONS: BULLETS vs ENEMIES ===
+  // === Bullet-enemy collision ===
   for (let i = projectiles.length - 1; i >= 0; i--) {
     let bullet = projectiles[i];
     for (let j = enemies.length - 1; j >= 0; j--) {
@@ -99,7 +115,7 @@ function draw() {
     }
   }
 
-  // === GAME OVER ===
+  // === Game Over ===
   if (player.health <= 0) {
     gameOver = true;
   }
