@@ -7,10 +7,16 @@ let gameManager;
 let gameOver = false;
 let gameStarted = false;
 let difficulty = null;
+let bgm; // 🔊 Background music
 
 // === Starfield ===
 let stars = [];
 const numStars = 100;
+
+function preload() {
+  soundFormats('mp3', 'wav');
+  bgm = loadSound('bgm.mp3');
+}
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -217,6 +223,13 @@ function startGame(level) {
   gameManager = new GameManager(difficulty);
   gameStarted = true;
   gameOver = false;
+
+  if (!bgm.isPlaying()) {
+    bgm.setLoop(true);
+    bgm.setVolume(0.5);
+    bgm.play();
+  }
+
   loop();
 }
 
@@ -228,4 +241,8 @@ function returnToMenu() {
   projectiles = [];
   powerUps = [];
   fadingEnemies = [];
+
+  if (bgm.isPlaying()) {
+    bgm.stop();
+  }
 }
