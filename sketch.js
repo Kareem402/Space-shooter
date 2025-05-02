@@ -2,12 +2,13 @@ let player;
 let enemies = [];
 let projectiles = [];
 let powerUps = [];
+let explosions = [];
 let gameManager;
 let gameOver = false;
 let gameStarted = false;
 let difficulty = null;
 
-// === Starfield Setup ===
+// === Starfield Background ===
 let stars = [];
 const numStars = 100;
 
@@ -30,8 +31,9 @@ function windowResized() {
 }
 
 function draw() {
-  // === Starfield Background ===
   background(0);
+
+  // === Starfield Animation ===
   noStroke();
   for (let star of stars) {
     fill(255);
@@ -58,7 +60,6 @@ function draw() {
     return;
   }
 
-  // === Power-up Timers ===
   if (player.shieldActive) {
     player.shieldTimer--;
     if (player.shieldTimer <= 0) player.shieldActive = false;
@@ -73,7 +74,7 @@ function draw() {
   player.update();
   player.display();
 
-  // === HUD: Show Active Power-Ups ===
+  // === HUD ===
   textSize(16);
   textAlign(LEFT, TOP);
   let statusY = height - 60;
@@ -97,9 +98,7 @@ function draw() {
 
     if (enemy.y + 30 > height) {
       enemies.splice(i, 1);
-      if (!player.shieldActive) {
-        player.takeDamage(20);
-      }
+      if (!player.shieldActive) player.takeDamage(20);
     }
   }
 
@@ -121,7 +120,7 @@ function draw() {
     }
   }
 
-  // === Bullet-Enemy Collisions ===
+  // === Collisions: Bullets vs Enemies ===
   for (let i = projectiles.length - 1; i >= 0; i--) {
     let bullet = projectiles[i];
     for (let j = enemies.length - 1; j >= 0; j--) {
@@ -132,10 +131,20 @@ function draw() {
         bullet.y >= enemy.y &&
         bullet.y <= enemy.y + 30
       ) {
+        explosions.push(new Explosion(enemy.x + 15, enemy.y + 15)); // 💥
         enemies.splice(j, 1);
         projectiles.splice(i, 1);
         break;
       }
+    }
+  }
+
+  // === Explosions ===
+  for (let i = explosions.length - 1; i >= 0; i--) {
+    explosions[i].update();
+    explosions[i].display();
+    if (explosions[i].isFinished()) {
+      explosions.splice(i, 1);
     }
   }
 
@@ -178,6 +187,7 @@ function startGame(level) {
   enemies = [];
   projectiles = [];
   powerUps = [];
+  explosions = [];
   gameManager = new GameManager(difficulty);
   gameStarted = true;
   gameOver = false;
@@ -191,4 +201,5 @@ function returnToMenu() {
   enemies = [];
   projectiles = [];
   powerUps = [];
+  explosions = [];
 }
