@@ -7,9 +7,22 @@ let gameOver = false;
 let gameStarted = false;
 let difficulty = null;
 
+// === Starfield Setup ===
+let stars = [];
+const numStars = 100;
+
 function setup() {
   createCanvas(windowWidth, windowHeight);
   textFont("monospace");
+
+  for (let i = 0; i < numStars; i++) {
+    stars.push({
+      x: random(width),
+      y: random(height),
+      size: random(1, 3),
+      speed: random(0.5, 2)
+    });
+  }
 }
 
 function windowResized() {
@@ -17,7 +30,18 @@ function windowResized() {
 }
 
 function draw() {
+  // === Starfield Background ===
   background(0);
+  noStroke();
+  for (let star of stars) {
+    fill(255);
+    circle(star.x, star.y, star.size);
+    star.y += star.speed;
+    if (star.y > height) {
+      star.y = 0;
+      star.x = random(width);
+    }
+  }
 
   if (!gameStarted) {
     drawMainMenu();
@@ -34,7 +58,7 @@ function draw() {
     return;
   }
 
-  // === Power-up timers ===
+  // === Power-up Timers ===
   if (player.shieldActive) {
     player.shieldTimer--;
     if (player.shieldTimer <= 0) player.shieldActive = false;
@@ -49,7 +73,7 @@ function draw() {
   player.update();
   player.display();
 
-  // === HUD: Show active power-ups ===
+  // === HUD: Show Active Power-Ups ===
   textSize(16);
   textAlign(LEFT, TOP);
   let statusY = height - 60;
@@ -85,7 +109,7 @@ function draw() {
     bullet.display();
   }
 
-  // === Power-ups ===
+  // === Power-Ups ===
   for (let i = powerUps.length - 1; i >= 0; i--) {
     let p = powerUps[i];
     p.update();
@@ -97,7 +121,7 @@ function draw() {
     }
   }
 
-  // === Bullet-enemy collision ===
+  // === Bullet-Enemy Collisions ===
   for (let i = projectiles.length - 1; i >= 0; i--) {
     let bullet = projectiles[i];
     for (let j = enemies.length - 1; j >= 0; j--) {
