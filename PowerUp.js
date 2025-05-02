@@ -11,7 +11,6 @@ class PowerUp {
     }
   
     display() {
-      // Color code based on type
       switch (this.type) {
         case "health":
           fill(0, 255, 0); // green
@@ -23,9 +22,8 @@ class PowerUp {
           fill(255, 0, 0); // red
           break;
         default:
-          fill(255, 255, 0); // yellow fallback
+          fill(255, 255, 0); // yellow
       }
-  
       ellipse(this.x, this.y, this.size);
     }
   
@@ -41,7 +39,12 @@ class PowerUp {
     applyEffect(player) {
       if (this.type === "health") {
         player._health = min(player.maxHealth, player._health + 20);
+      } else if (this.type === "shield") {
+        player.shieldActive = true;
+        player.shieldTimer = 300; // 5 seconds
+      } else if (this.type === "rapid") {
+        player.rapidFire = true;
+        player.rapidTimer = 300; // 5 seconds
       }
-      // future: add logic for "shield", "rapid"
     }
   }  
