@@ -72,7 +72,9 @@ class Player {
   }
 
   shoot() {
-    if (!this.rapidFire && frameCount - this.lastShot < 20) return;
+    // Faster fire rate: 10-frame cooldown
+    if (!this.rapidFire && frameCount - this.lastShot < 10) return;
+
     projectiles.push(new Projectile(this.x + this.width / 2, this.y));
     this.lastShot = frameCount;
 
