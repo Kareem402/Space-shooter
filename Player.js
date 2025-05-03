@@ -18,31 +18,25 @@ class Player {
     if (keyIsDown(RIGHT_ARROW)) this.x += 7;
     this.x = constrain(this.x, 0, width - this.width);
 
-    if (this.rapidFire && frameCount - this.lastShot > 5 && keyIsDown(32)) {
-      this.shoot();
-      this.lastShot = frameCount;
+    if (this.rapidFire) {
+      if (frameCount - this.lastShot >= 5) {
+        this.shoot();
+        this.lastShot = frameCount;
+      }
     }
   }
 
   display() {
-    // Player color
     switch (selectedSkin) {
-      case 'blue':
-        fill(0, 0, 255);
-        break;
-      case 'red':
-        fill(255, 0, 0);
-        break;
-      case 'gold':
-        fill(255, 215, 0);
-        break;
-      default:
-        fill(0, 255, 0); // green
+      case 'blue': fill(0, 0, 255); break;
+      case 'red': fill(255, 0, 0); break;
+      case 'gold': fill(255, 215, 0); break;
+      default: fill(0, 255, 0); // green
     }
 
     rect(this.x, this.y, this.width, this.height);
 
-    // === Health Bar ===
+    // Health bar
     let barWidth = 200;
     let barHeight = 20;
     let healthRatio = this._health / this.maxHealth;
@@ -58,13 +52,13 @@ class Player {
     textAlign(CENTER, CENTER);
     text(`Health: ${this._health}`, 20 + barWidth / 2, 20 + barHeight / 2);
 
-    // === Score Bar ===
-    let nextThreshold = skinOptions.find(s => s.threshold > score)?.threshold || score + 100;
+    // Score bar
+    let nextThreshold = (typeof skinOptions !== 'undefined' ? skinOptions.find(s => s.threshold > score)?.threshold : null) || score + 100;
     let scoreRatio = score / nextThreshold;
 
     fill(60);
     rect(20, 50, barWidth, barHeight, 10);
-    fill(255, 215, 0); // gold
+    fill(255, 215, 0);
     rect(20, 50, barWidth * constrain(scoreRatio, 0, 1), barHeight, 10);
 
     fill(255);
@@ -72,16 +66,9 @@ class Player {
   }
 
   shoot() {
-    // Faster fire rate: 10-frame cooldown
     if (!this.rapidFire && frameCount - this.lastShot < 10) return;
-
     projectiles.push(new Projectile(this.x + this.width / 2, this.y));
     this.lastShot = frameCount;
-
-    if (shootSound && shootSound.isLoaded()) {
-      shootSound.setVolume(0.3);
-      shootSound.play();
-    }
   }
 
   get health() {

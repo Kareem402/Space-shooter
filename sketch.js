@@ -1,3 +1,4 @@
+// --- top unchanged setup ---
 let player;
 let enemies = [];
 let projectiles = [];
@@ -10,32 +11,26 @@ let difficulty = null;
 let bgm;
 let isMuted = false;
 let bgmLoaded = false;
-let score = 0;
-let inShop = false;
-
-let unlockedSkins = [];
-let selectedSkin = 'green';
-const skinOptions = [
-  { color: 'green', threshold: 0 },
-  { color: 'blue', threshold: 200 },
-  { color: 'red', threshold: 500 },
-  { color: 'gold', threshold: 1000 }
-];
-
 let stars = [];
 const numStars = 100;
+let inShop = false;
+
+let score = 0;
+let selectedSkin = 'green';
+let unlockedSkins = ['green'];
+
+const skinOptions = [
+  { color: 'green', threshold: 0 },
+  { color: 'blue', threshold: 100 },
+  { color: 'red', threshold: 200 },
+  { color: 'gold', threshold: 500 }
+];
 
 function preload() {
   soundFormats('mp3', 'wav');
   bgm = loadSound('bgm.mp3',
-    () => {
-      console.log("✅ BGM loaded");
-      bgmLoaded = true;
-    },
-    (err) => {
-      console.error("❌ Failed to load BGM:", err);
-      bgmLoaded = false;
-    }
+    () => { bgmLoaded = true; },
+    (err) => { console.error("❌ Failed to load BGM:", err); }
   );
 }
 
@@ -52,8 +47,8 @@ function setup() {
     });
   }
 
-  let saved = localStorage.getItem("unlockedSkins");
-  if (saved) unlockedSkins = JSON.parse(saved);
+  let savedSkins = localStorage.getItem("unlockedSkins");
+  if (savedSkins) unlockedSkins = JSON.parse(savedSkins);
 
   const muteBtn = document.getElementById("muteBtn");
   muteBtn.addEventListener("click", () => {
@@ -65,18 +60,101 @@ function setup() {
   });
 }
 
+// -- MAIN MENU with hover on SHOP --
+function drawMainMenu() {
+  fill(255);
+  textAlign(CENTER, CENTER);
+  textSize(36);
+  text("SPACE SHOOTER", width / 2, height / 2 - 100);
+  textSize(24);
+  text("Press 1 for EASY", width / 2, height / 2 - 30);
+  text("Press 2 for MEDIUM", width / 2, height / 2);
+  text("Press 3 for HARD", width / 2, height / 2 + 30);
+
+  let shopX = width / 2 - 60;
+  let shopY = height / 2 + 80;
+  let shopW = 120;
+  let shopH = 40;
+  let isHovering =
+    mouseX >= shopX && mouseX <= shopX + shopW &&
+    mouseY >= shopY && mouseY <= shopY + shopH;
+
+  if (isHovering) {
+    fill(80, 180, 255);
+    rect(shopX - 5, shopY - 5, shopW + 10, shopH + 10, 12);
+  } else {
+    fill(50, 150, 255);
+    rect(shopX, shopY, shopW, shopH, 10);
+  }
+
+  fill(255);
+  textSize(20);
+  text("SHOP", width / 2, height / 2 + 100);
+}
+
+// -- SHOP SCREEN with hover on skins & back button --
+function drawShopScreen() {
+  fill(255);
+  textAlign(CENTER, CENTER);
+  textSize(32);
+  text("SHOP - Select a Skin", width / 2, 60);
+
+  let startX = width / 2 - (skinOptions.length * 60) / 2;
+  let y = height / 2;
+
+  skinOptions.forEach((skin, i) => {
+    let x = startX + i * 60;
+    let isHovered = mouseX >= x && mouseX <= x + 50 && mouseY >= y && mouseY <= y + 50;
+
+    // Draw skin box
+    fill(skin.color);
+    rect(x, y, 50, 50);
+
+    // Hover effect
+    if (isHovered) {
+      stroke(255);
+      strokeWeight(2);
+      noFill();
+      rect(x - 4, y - 4, 58, 58, 4);
+      noStroke();
+    }
+
+    // Locked overlay
+    if (!unlockedSkins.includes(skin.color)) {
+      fill(0, 0, 0, 180);
+      rect(x, y, 50, 50);
+      fill(255);
+      textSize(12);
+      text(`🔒 ${skin.threshold}`, x + 25, y + 25);
+    } else if (selectedSkin === skin.color) {
+      noFill();
+      stroke(255);
+      strokeWeight(3);
+      rect(x - 4, y - 4, 58, 58);
+      noStroke();
+    }
+  });
+
+  // Back Button w/ hover
+  let backHovered = mouseX >= 30 && mouseX <= 130 && mouseY >= 30 && mouseY <= 70;
+  if (backHovered) {
+    fill(240, 80, 80);
+    rect(25, 25, 110, 50, 12);
+  } else {
+    fill(200, 60, 60);
+    rect(30, 30, 100, 40, 10);
+  }
+
+  fill(255);
+  textSize(18);
+  textAlign(LEFT, CENTER);
+  text("⬅ Back", 40, 50);
+}
+
+// -- rest of unchanged core logic --
 function draw() {
   background(0);
   noStroke();
-
-  if (!bgmLoaded) {
-    fill(255);
-    textAlign(CENTER, CENTER);
-    textSize(24);
-    text("Loading BGM...", width / 2, height / 2);
-    return;
-  }
-
   for (let star of stars) {
     fill(255);
     circle(star.x, star.y, star.size);
@@ -88,11 +166,7 @@ function draw() {
   }
 
   if (!gameStarted) {
-    if (inShop) {
-      drawShopMenu();
-    } else {
-      drawMainMenu();
-    }
+    inShop ? drawShopScreen() : drawMainMenu();
     return;
   }
 
@@ -106,251 +180,136 @@ function draw() {
     return;
   }
 
-  if (player.shieldActive) {
-    player.shieldTimer--;
-    if (player.shieldTimer <= 0) player.shieldActive = false;
-  }
-
-  if (player.rapidFire) {
-    player.rapidTimer--;
-    if (player.rapidTimer <= 0) player.rapidFire = false;
-  }
+  if (player.shieldActive) player.shieldTimer--;
+  if (player.rapidFire) player.rapidTimer--;
+  if (player.shieldTimer <= 0) player.shieldActive = false;
+  if (player.rapidTimer <= 0) player.rapidFire = false;
 
   gameManager.update();
   player.update();
   player.display();
 
-  // HUD (no top-right score anymore)
   textSize(16);
   textAlign(LEFT, TOP);
   let statusY = height - 60;
-
   if (player.shieldActive) {
-    fill(0, 200, 255);
-    text("🛡️ Shield Active", 20, statusY);
-    statusY += 20;
+    fill(0, 200, 255); text("🛡️ Shield Active", 20, statusY); statusY += 20;
   }
-
   if (player.rapidFire) {
-    fill(255, 100, 100);
-    text("🔫 Rapid Fire Active", 20, statusY);
+    fill(255, 100, 100); text("🔫 Rapid Fire Active", 20, statusY);
   }
 
+  // enemies
   for (let i = enemies.length - 1; i >= 0; i--) {
     let enemy = enemies[i];
-    enemy.update();
-    enemy.display();
-
+    enemy.update(); enemy.display();
     if (enemy.y + 30 > height) {
       enemies.splice(i, 1);
-      if (!player.shieldActive) {
-        player.takeDamage(20);
-      }
+      if (!player.shieldActive) player.takeDamage(20);
     }
   }
 
-  for (let bullet of projectiles) {
-    bullet.update();
-    bullet.display();
-  }
+  // bullets
+  for (let bullet of projectiles) bullet.update(), bullet.display();
 
+  // powerups
   for (let i = powerUps.length - 1; i >= 0; i--) {
-    let p = powerUps[i];
-    p.update();
-    p.display();
-
+    let p = powerUps[i]; p.update(); p.display();
     if (p.isCollected(player)) {
-      p.applyEffect(player);
-      powerUps.splice(i, 1);
+      p.applyEffect(player); powerUps.splice(i, 1);
     }
   }
 
-  let bulletsToRemove = [];
-  let enemiesToRemove = [];
-
+  // bullet-enemy collisions
+  let bulletsToRemove = [], enemiesToRemove = [];
   for (let i = 0; i < projectiles.length; i++) {
     let bullet = projectiles[i];
-
     for (let j = 0; j < enemies.length; j++) {
       let enemy = enemies[j];
-
-      if (
-        bullet.x >= enemy.x &&
-        bullet.x <= enemy.x + 30 &&
-        bullet.y >= enemy.y &&
-        bullet.y <= enemy.y + 30
-      ) {
-        fadingEnemies.push({
-          x: enemies[j].x,
-          y: enemies[j].y,
-          size: 30,
-          alpha: 255
-        });
-
-        bulletsToRemove.push(i);
-        enemiesToRemove.push(j);
-        score += 10;
-        break;
+      if (bullet.x >= enemy.x && bullet.x <= enemy.x + 30 && bullet.y >= enemy.y && bullet.y <= enemy.y + 30) {
+        fadingEnemies.push({ x: enemy.x, y: enemy.y, size: 30, alpha: 255 });
+        bulletsToRemove.push(i); enemiesToRemove.push(j); score += 10; break;
       }
     }
   }
+  for (let i of bulletsToRemove.reverse()) projectiles.splice(i, 1);
+  for (let j of enemiesToRemove.reverse()) enemies.splice(j, 1);
 
-  for (let i = bulletsToRemove.length - 1; i >= 0; i--) {
-    projectiles.splice(bulletsToRemove[i], 1);
-  }
-
-  for (let i = enemiesToRemove.length - 1; i >= 0; i--) {
-    enemies.splice(enemiesToRemove[i], 1);
-  }
-
+  // fading animation
   for (let i = fadingEnemies.length - 1; i >= 0; i--) {
     let e = fadingEnemies[i];
-    e.alpha -= 10;
-    e.size *= 0.9;
-
-    if (e.alpha <= 0 || e.size <= 1) {
-      fadingEnemies.splice(i, 1);
-    } else {
+    e.alpha -= 10; e.size *= 0.9;
+    if (e.alpha <= 0 || e.size <= 1) fadingEnemies.splice(i, 1);
+    else {
       fill(255, 0, 0, e.alpha);
       rect(e.x, e.y, e.size, e.size);
     }
   }
 
-  if (player.health <= 0) {
-    gameOver = true;
-  }
-}
-
-function drawMainMenu() {
-  fill(255);
-  textAlign(CENTER, CENTER);
-  textSize(36);
-  text("SPACE SHOOTER", width / 2, height / 2 - 100);
-  textSize(24);
-  text("Press 1 for EASY", width / 2, height / 2 - 30);
-  text("Press 2 for MEDIUM", width / 2, height / 2);
-  text("Press 3 for HARD", width / 2, height / 2 + 30);
-  text("Press S to enter SHOP", width / 2, height / 2 + 80);
-}
-
-function drawShopMenu() {
-  background(0);
-  fill(255);
-  textAlign(CENTER, CENTER);
-  textSize(32);
-  text("🎨 SHOP — UNLOCK SKINS", width / 2, 80);
-  textSize(18);
-  text("Click a skin to equip it. Score to unlock.", width / 2, 120);
-
-  let startX = width / 2 - 200;
-  let startY = 200;
-
-  for (let i = 0; i < skinOptions.length; i++) {
-    let skin = skinOptions[i];
-    let x = startX + i * 100;
-    let y = startY;
-
-    fill(skin.color);
-    rect(x, y, 50, 50);
-
-    fill(255);
-    textSize(12);
-    textAlign(CENTER);
-    if (score >= skin.threshold || unlockedSkins.includes(skin.color)) {
-      text("UNLOCKED", x + 25, y + 70);
-    } else {
-      text(`LOCKED\n${skin.threshold} pts`, x + 25, y + 70);
-    }
-  }
-
-  fill(255);
-  text("Press B to go Back", width / 2, height - 60);
+  if (projectiles.length > 300) projectiles.splice(0, 100);
+  if (player.health <= 0) gameOver = true;
 }
 
 function keyPressed() {
   if (!gameStarted) {
-    if (key === 's' || key === 'S') {
-      inShop = true;
-    } else if (key === 'b' || key === 'B') {
-      inShop = false;
-    }
     if (key === '1') startGame("easy");
     if (key === '2') startGame("medium");
     if (key === '3') startGame("hard");
     return;
   }
+  if (gameOver && (key === 'r' || key === 'R')) returnToMenu();
+  if (key === ' ' && !player.rapidFire) player.shoot();
+}
 
-  if (gameOver && (key === 'r' || key === 'R')) {
-    returnToMenu();
-    return;
+function mousePressed() {
+  if (!gameStarted) {
+    if (inShop) {
+      if (mouseX >= 30 && mouseX <= 130 && mouseY >= 30 && mouseY <= 70) {
+        inShop = false; return;
+      }
+      let startX = width / 2 - (skinOptions.length * 60) / 2;
+      let y = height / 2;
+      skinOptions.forEach((skin, i) => {
+        let x = startX + i * 60;
+        if (mouseX >= x && mouseX <= x + 50 && mouseY >= y && mouseY <= y + 50) {
+          if (score >= skin.threshold || unlockedSkins.includes(skin.color)) {
+            selectedSkin = skin.color;
+            if (!unlockedSkins.includes(skin.color)) {
+              unlockedSkins.push(skin.color);
+              localStorage.setItem("unlockedSkins", JSON.stringify(unlockedSkins));
+            }
+          }
+        }
+      });
+    } else {
+      if (mouseX >= width / 2 - 60 && mouseX <= width / 2 + 60 &&
+        mouseY >= height / 2 + 80 && mouseY <= height / 2 + 120) {
+        inShop = true; return;
+      }
+    }
   }
-
-  if (key === ' ') player.shoot();
+  if (getAudioContext().state !== 'running') getAudioContext().resume();
 }
 
 function startGame(level) {
-  difficulty = level;
-  player = new Player();
-  enemies = [];
-  projectiles = [];
-  powerUps = [];
-  fadingEnemies = [];
-  score = 0;
+  difficulty = level; score = 0;
+  player = new Player(); enemies = [];
+  projectiles = []; powerUps = []; fadingEnemies = [];
   gameManager = new GameManager(difficulty);
-  gameStarted = true;
-  gameOver = false;
-
+  gameStarted = true; gameOver = false;
   if (bgmLoaded && !bgm.isPlaying()) {
     bgm.setLoop(true);
     bgm.setVolume(isMuted ? 0 : 0.4);
     bgm.play();
   }
-
-  loop();
 }
 
 function returnToMenu() {
   gameStarted = false;
   gameOver = false;
   difficulty = null;
-  enemies = [];
-  projectiles = [];
-  powerUps = [];
-  fadingEnemies = [];
-
-  if (bgmLoaded && bgm.isPlaying()) {
-    bgm.stop();
-  }
-}
-
-function mousePressed() {
-  if (!gameStarted && inShop) {
-    let startX = width / 2 - 200;
-    let startY = 200;
-
-    for (let i = 0; i < skinOptions.length; i++) {
-      let skin = skinOptions[i];
-      let x = startX + i * 100;
-      let y = startY;
-
-      if (
-        mouseX >= x &&
-        mouseX <= x + 50 &&
-        mouseY >= y &&
-        mouseY <= y + 50
-      ) {
-        if (score >= skin.threshold || unlockedSkins.includes(skin.color)) {
-          selectedSkin = skin.color;
-          if (!unlockedSkins.includes(skin.color)) {
-            unlockedSkins.push(skin.color);
-            localStorage.setItem("unlockedSkins", JSON.stringify(unlockedSkins));
-          }
-        }
-      }
-    }
-  }
-
-  if (getAudioContext().state !== 'running') {
-    getAudioContext().resume();
-  }
+  inShop = false;
+  enemies = []; projectiles = [];
+  powerUps = []; fadingEnemies = [];
+  if (bgmLoaded && bgm.isPlaying()) bgm.stop();
 }
