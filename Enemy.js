@@ -1,36 +1,41 @@
 class Enemy {
-  constructor(x, y) {
+  constructor(x, y, type = 'basic', speed = 2) {
     this.x = x;
     this.y = y;
-    this.speed = 2;
+    this.type = type;
+    this.baseSpeed = speed;
+    this.speed = speed;
+
+    // for zig-zag
+    this.angle = 0;
+    this.amplitude = 30;
+    this.direction = random() < 0.5 ? 1 : -1;
+
+    // size
+    this.size = 30;
   }
 
   update() {
-    this.y += this.speed;
+    if (this.type === 'zigzag') {
+      this.x += sin(this.angle) * this.direction * 2;
+      this.y += this.speed;
+      this.angle += 0.1;
+    } else {
+      this.y += this.speed;
+    }
   }
 
   display() {
-    fill(255, 0, 0);
-    rect(this.x, this.y, 30, 30);
-  }
-}
-
-class FastEnemy extends Enemy {
-  constructor(x, y) {
-    super(x, y);
-    this.speed = 4;
-  }
-}
-
-class ZigzagEnemy extends Enemy {
-  constructor(x, y) {
-    super(x, y);
-    this.dir = 1;
-  }
-
-  update() {
-    this.x += this.dir * 2;
-    if (this.x <= 0 || this.x >= width - 30) this.dir *= -1;
-    this.y += 1.5;
+    switch (this.type) {
+      case 'fast':
+        fill(255, 165, 0); // orange
+        break;
+      case 'zigzag':
+        fill(186, 85, 211); // purple
+        break;
+      default:
+        fill(255, 0, 0); // red
+    }
+    rect(this.x, this.y, this.size, this.size);
   }
 }

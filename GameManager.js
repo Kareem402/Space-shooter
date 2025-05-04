@@ -1,27 +1,54 @@
 class GameManager {
   constructor(difficulty) {
     this.spawnTimer = 0;
-    this.powerUpTimer = 0;
+    this.spawnInterval = 60;
+    this.waveLevel = 1;
 
     switch (difficulty) {
-      case "easy": this.spawnRate = 90; break;
-      case "medium": this.spawnRate = 60; break;
-      case "hard": this.spawnRate = 30; break;
-      default: this.spawnRate = 60;
+      case "easy":
+        this.spawnInterval = 60;
+        break;
+      case "medium":
+        this.spawnInterval = 40;
+        break;
+      case "hard":
+        this.spawnInterval = 25;
+        break;
     }
   }
 
   update() {
     this.spawnTimer++;
-    if (this.spawnTimer % this.spawnRate === 0) {
-      const type = random([Enemy, FastEnemy, ZigzagEnemy]);
-      enemies.push(new type(random(width - 30), 0));
+
+    // Increase wave level based on score milestones
+    let newWave = Math.floor(score / 100) + 1;
+    if (newWave > this.waveLevel) {
+      this.waveLevel = newWave;
+      this.spawnInterval = max(10, this.spawnInterval - 5); // faster spawns
     }
 
-    this.powerUpTimer++;
-    if (this.powerUpTimer % 180 === 0) {
-      const types = ["health", "shield", "rapid"];
-      powerUps.push(new PowerUp(random(width - 30), 0, random(types)));
+    if (this.spawnTimer >= this.spawnInterval) {
+      this.spawnEnemy();
+      this.spawnTimer = 0;
     }
+  }
+
+  spawnEnemy() {
+    const x = random(width - 30);
+    const y = -30;
+
+    // Pick enemy type based on wave level
+    let enemyType = 'basic';
+    const rand = random();
+
+    if (this.waveLevel >= 3 && rand < 0.3) {
+      enemyType = 'zigzag';
+    } else if (this.waveLevel >= 2 && rand < 0.6) {
+      enemyType = 'fast';
+    }
+
+    let speed = 2 + this.waveLevel * 0.2;
+
+    enemies.push(new Enemy(x, y, enemyType, speed));
   }
 }
