@@ -11,8 +11,8 @@ class Enemy {
     this.amplitude = 30;
     this.direction = random() < 0.5 ? 1 : -1;
 
-    // size
-    this.size = 30;
+    // increased size for easier hitbox
+    this.size = 40;
   }
 
   update() {
@@ -27,14 +27,9 @@ class Enemy {
 
   display() {
     switch (this.type) {
-      case 'fast':
-        fill(255, 165, 0); // orange
-        break;
-      case 'zigzag':
-        fill(186, 85, 211); // purple
-        break;
-      default:
-        fill(255, 0, 0); // red
+      case 'fast': fill(255, 165, 0); break;
+      case 'zigzag': fill(186, 85, 211); break;
+      default: fill(255, 0, 0);
     }
     rect(this.x, this.y, this.size, this.size);
   }

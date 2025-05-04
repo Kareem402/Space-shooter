@@ -2,8 +2,9 @@ class Player {
   constructor() {
     this.x = width / 2;
     this.y = height - 70;
-    this.width = 40;
-    this.height = 20;
+    this.width = 50;
+    this.height = 30;
+    this.size = 40; // used for collision
     this._health = 100;
     this.maxHealth = 100;
     this.shieldActive = false;
@@ -18,11 +19,9 @@ class Player {
     if (keyIsDown(RIGHT_ARROW)) this.x += 7;
     this.x = constrain(this.x, 0, width - this.width);
 
-    if (this.rapidFire) {
-      if (frameCount - this.lastShot >= 5) {
-        this.shoot();
-        this.lastShot = frameCount;
-      }
+    if (this.rapidFire && frameCount - this.lastShot >= 5) {
+      this.shoot();
+      this.lastShot = frameCount;
     }
   }
 
@@ -31,7 +30,7 @@ class Player {
       case 'blue': fill(0, 0, 255); break;
       case 'red': fill(255, 0, 0); break;
       case 'gold': fill(255, 215, 0); break;
-      default: fill(0, 255, 0); // green
+      default: fill(0, 255, 0);
     }
 
     rect(this.x, this.y, this.width, this.height);
@@ -52,7 +51,6 @@ class Player {
     textAlign(CENTER, CENTER);
     text(`Health: ${this._health}`, 20 + barWidth / 2, 20 + barHeight / 2);
 
-    // Score bar
     let nextThreshold = (typeof skinOptions !== 'undefined' ? skinOptions.find(s => s.threshold > score)?.threshold : null) || score + 100;
     let scoreRatio = score / nextThreshold;
 
@@ -76,6 +74,7 @@ class Player {
   }
 
   takeDamage(amount) {
+    if (this.shieldActive) return; // 🛡️ Ignore damage if shield is active
     this._health = max(0, this._health - amount);
   }
 }

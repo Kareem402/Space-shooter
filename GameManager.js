@@ -20,11 +20,11 @@ class GameManager {
   update() {
     this.spawnTimer++;
 
-    // Increase wave level based on score milestones
+    // Score-based wave scaling
     let newWave = Math.floor(score / 100) + 1;
     if (newWave > this.waveLevel) {
       this.waveLevel = newWave;
-      this.spawnInterval = max(10, this.spawnInterval - 5); // faster spawns
+      this.spawnInterval = max(10, this.spawnInterval - 5);
     }
 
     if (this.spawnTimer >= this.spawnInterval) {
@@ -37,7 +37,6 @@ class GameManager {
     const x = random(width - 30);
     const y = -30;
 
-    // Pick enemy type based on wave level
     let enemyType = 'basic';
     const rand = random();
 
@@ -47,8 +46,14 @@ class GameManager {
       enemyType = 'fast';
     }
 
-    let speed = 2 + this.waveLevel * 0.2;
-
+    const speed = 2 + this.waveLevel * 0.2;
     enemies.push(new Enemy(x, y, enemyType, speed));
+
+    // 🔮 20% chance to spawn a power-up with each enemy
+    if (random() < 0.2) {
+      const powerTypes = ['shield', 'rapid', 'freeze'];
+      const randomType = random(powerTypes);
+      powerUps.push(new PowerUp(x + 10, y + 10, randomType));
+    }
   }
 }
