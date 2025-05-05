@@ -5,14 +5,14 @@ class Enemy {
     this.type = type;
     this.baseSpeed = speed;
     this.speed = speed;
-
-    // for zig-zag
     this.angle = 0;
     this.amplitude = 30;
     this.direction = random() < 0.5 ? 1 : -1;
-
-    // increased size for easier hitbox
     this.size = 40;
+
+    // NEW: Smarter enemies
+    this.shootCooldown = 90;
+    this.lastShotFrame = frameCount;
   }
 
   update() {
@@ -22,6 +22,13 @@ class Enemy {
       this.angle += 0.1;
     } else {
       this.y += this.speed;
+    }
+
+    if (this.type !== 'basic' && frameCount - this.lastShotFrame > this.shootCooldown) {
+      if (random() < 0.2) {
+        projectiles.push(new Projectile(this.x + this.size / 2, this.y + this.size, 'enemy'));
+      }
+      this.lastShotFrame = frameCount;
     }
   }
 

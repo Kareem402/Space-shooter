@@ -1,4 +1,3 @@
-// 🔭 Space Shooter: Finalized sketch.js
 let player;
 let enemies = [];
 let projectiles = [];
@@ -19,8 +18,17 @@ let freezeTimer = 0;
 let paused = false;
 
 let score = 0;
+let coins = parseInt(localStorage.getItem("coins")) || 0;
+let upgrades = JSON.parse(localStorage.getItem("upgrades")) || {
+  maxHealth: 0,
+  speed: 0,
+  weapon: 'normal'
+};
 let selectedSkin = 'green';
 let unlockedSkins = ['green'];
+
+let showStats = false;
+let finalStats = { accuracy: 0, enemiesKilled: 0, shotsFired: 0 };
 
 const skinOptions = [
   { color: 'green', threshold: 0 },
@@ -95,6 +103,15 @@ function draw() {
     text("Game Over", width / 2, height / 2 - 40);
     textSize(20);
     text("Press 'R' to return to menu", width / 2, height / 2);
+
+    if (showStats) {
+      textSize(20);
+      text(`Kills: ${finalStats.enemiesKilled}`, width/2, height/2 + 40);
+      text(`Shots: ${finalStats.shotsFired}`, width/2, height/2 + 70);
+      text(`Accuracy: ${finalStats.accuracy}%`, width/2, height/2 + 100);
+      text(`Coins Earned: ${coins}`, width/2, height/2 + 130);
+    }
+
     return;
   }
 
@@ -119,31 +136,6 @@ function draw() {
   gameManager.update();
   player.update();
   player.display();
-
-  textSize(16);
-  textAlign(LEFT, TOP);
-  let statusY = height - 100;
-
-  if (player.shieldActive) {
-    fill(0, 200, 255);
-    text("🛡️ Shield Active", 20, statusY);
-    statusY += 20;
-  }
-
-  if (player.rapidFire) {
-    fill(255, 100, 100);
-    text("🔫 Rapid Fire Active", 20, statusY);
-    statusY += 20;
-  }
-
-  if (freezeEnemies) {
-    fill(150, 255, 255);
-    text("❄️ Time Frozen!", 20, statusY);
-    statusY += 20;
-  }
-
-  fill(200, 255, 200);
-  text(`🌊 Wave: ${gameManager.waveLevel}`, 20, statusY);
 
   for (let i = enemies.length - 1; i >= 0; i--) {
     let enemy = enemies[i];
@@ -172,6 +164,8 @@ function draw() {
 
   for (let i = 0; i < projectiles.length; i++) {
     let bullet = projectiles[i];
+    if (bullet.type === 'enemy') continue;
+
     for (let j = 0; j < enemies.length; j++) {
       let enemy = enemies[j];
       if (bullet.x >= enemy.x && bullet.x <= enemy.x + enemy.size &&
@@ -180,6 +174,8 @@ function draw() {
         bulletsToRemove.push(i);
         enemiesToRemove.push(j);
         score += 10;
+        coins += 1;
+        player.enemiesKilled++;
         break;
       }
     }
@@ -200,7 +196,16 @@ function draw() {
   }
 
   if (projectiles.length > 300) projectiles.splice(0, 100);
-  if (player.health <= 0) gameOver = true;
+  if (player.health <= 0) {
+    if (player.shotsFired > 0) {
+      finalStats.accuracy = ((player.enemiesKilled / player.shotsFired) * 100).toFixed(1);
+      finalStats.enemiesKilled = player.enemiesKilled;
+      finalStats.shotsFired = player.shotsFired;
+      showStats = true;
+    }
+    localStorage.setItem("coins", coins);
+    gameOver = true;
+  }
 }
 
 function keyPressed() {
@@ -263,7 +268,13 @@ function mousePressed() {
 function startGame(level) {
   difficulty = level;
   score = 0;
+  coins = parseInt(localStorage.getItem("coins")) || 0;
   player = new Player();
+  player.maxHealth += upgrades.maxHealth;
+  player._health = player.maxHealth;
+  player.weaponType = upgrades.weapon;
+  player.speedBoost = upgrades.speed;
+
   enemies = [];
   projectiles = [];
   powerUps = [];
@@ -271,6 +282,7 @@ function startGame(level) {
   gameManager = new GameManager(difficulty);
   gameStarted = true;
   gameOver = false;
+  showStats = false;
 
   if (bgmLoaded && !bgm.isPlaying()) {
     bgm.setLoop(true);
@@ -360,6 +372,52 @@ function drawShopScreen() {
       noStroke();
     }
   });
+
+  textSize(24);
+  text("Permanent Upgrades", width / 2, height / 2 + 100);
+
+  let upgradeOptions = [
+    { label: "+20 Max Health", cost: 50, key: "maxHealth" },
+    { label: "+1 Speed", cost: 75, key: "speed" },
+    { label: "Spread Shot", cost: 100, key: "weapon", value: "spread" },
+    { label: "Laser Beam", cost: 150, key: "weapon", value: "laser" }
+  ];
+
+  upgradeOptions.forEach((upg, i) => {
+    let ux = width / 2 - 100;
+    let uy = height / 2 + 130 + i * 50;
+    let uw = 200;
+    let uh = 40;
+
+    let owned = false;
+    if (upg.key === "weapon") owned = upgrades.weapon === upg.value;
+    else owned = upgrades[upg.key] >= (upg.value || 1);
+
+    fill(owned ? 'gray' : 'white');
+    rect(ux, uy, uw, uh, 10);
+
+    fill(owned ? 180 : 0);
+    textSize(16);
+    textAlign(CENTER, CENTER);
+    text(owned ? `✓ ${upg.label}` : `${upg.label} - ${upg.cost} 🪙`, ux + uw / 2, uy + uh / 2);
+
+    if (mouseIsPressed &&
+      mouseX >= ux && mouseX <= ux + uw &&
+      mouseY >= uy && mouseY <= uy + uh && !owned) {
+      if (coins >= upg.cost) {
+        coins -= upg.cost;
+        if (upg.key === "weapon") upgrades.weapon = upg.value;
+        else upgrades[upg.key] += (upg.key === "maxHealth" ? 20 : 1);
+        localStorage.setItem("coins", coins);
+        localStorage.setItem("upgrades", JSON.stringify(upgrades));
+      }
+    }
+  });
+
+  textSize(18);
+  fill(255, 255, 0);
+  textAlign(RIGHT, TOP);
+  text(`Coins: ${coins}`, width - 30, 30);
 
   let backHovered = mouseX >= 30 && mouseX <= 130 && mouseY >= 30 && mouseY <= 70;
   if (backHovered) {
