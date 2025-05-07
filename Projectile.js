@@ -12,9 +12,6 @@ class Projectile {
   }
 
   display() {
-    if (this.type === 'laser') fill(0, 255, 255);
-    else if (this.type === 'spread') fill(255, 150, 0);
-    else fill(255);
-    rect(this.x, this.y, this.width, 10);
+    image(imgBullet, this.x, this.y, this.width, 10);
   }
 }

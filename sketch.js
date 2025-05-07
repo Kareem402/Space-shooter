@@ -30,6 +30,9 @@ let unlockedSkins = ['green'];
 let showStats = false;
 let finalStats = { accuracy: 0, enemiesKilled: 0, shotsFired: 0 };
 
+let imgPlayerGreen, imgEnemyBasic, imgEnemyFast, imgEnemyZigzag, imgEnemyBoss, imgBullet;
+let imgSkinGreen, imgSkinBlue, imgSkinRed, imgSkinGold;
+
 const skinOptions = [
   { color: 'green', threshold: 0 },
   { color: 'blue', threshold: 100 },
@@ -39,10 +42,22 @@ const skinOptions = [
 
 function preload() {
   soundFormats('mp3', 'wav');
-  bgm = loadSound('bgm.mp3',
+  bgm = loadSound('Assets/bgm.mp3',
     () => { bgmLoaded = true; },
     (err) => { console.error("❌ Failed to load BGM:", err); }
   );
+
+  imgPlayerGreen = loadImage('Assets/player_green.png');
+  imgEnemyBasic = loadImage('Assets/enemy_basic.png');
+  imgEnemyFast = loadImage('Assets/enemy_fast.png');
+  imgEnemyZigzag = loadImage('Assets/enemy_zigzag.png');
+  imgEnemyBoss = loadImage('Assets/enemy_boss.png');
+  imgBullet = loadImage('Assets/bullet.png');
+
+  imgSkinGreen = imgEnemyBasic;
+  imgSkinBlue = imgEnemyZigzag;
+  imgSkinRed = imgEnemyFast;
+  imgSkinGold = imgEnemyBoss;
 }
 
 function setup() {
@@ -106,10 +121,10 @@ function draw() {
 
     if (showStats) {
       textSize(20);
-      text(`Kills: ${finalStats.enemiesKilled}`, width/2, height/2 + 40);
-      text(`Shots: ${finalStats.shotsFired}`, width/2, height/2 + 70);
-      text(`Accuracy: ${finalStats.accuracy}%`, width/2, height/2 + 100);
-      text(`Coins Earned: ${coins}`, width/2, height/2 + 130);
+      text(`Kills: ${finalStats.enemiesKilled}`, width / 2, height / 2 + 40);
+      text(`Shots: ${finalStats.shotsFired}`, width / 2, height / 2 + 70);
+      text(`Accuracy: ${finalStats.accuracy}%`, width / 2, height / 2 + 100);
+      text(`Coins Earned: ${coins}`, width / 2, height / 2 + 130);
     }
 
     return;
@@ -347,8 +362,14 @@ function drawShopScreen() {
     let x = startX + i * 60;
     let isHovered = mouseX >= x && mouseX <= x + 50 && mouseY >= y && mouseY <= y + 50;
 
-    fill(skin.color);
-    rect(x, y, 50, 50);
+    let img = {
+      green: imgSkinGreen,
+      blue: imgSkinBlue,
+      red: imgSkinRed,
+      gold: imgSkinGold
+    }[skin.color];
+
+    image(img, x, y, 50, 50);
 
     if (isHovered) {
       stroke(255);

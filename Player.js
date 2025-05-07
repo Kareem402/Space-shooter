@@ -3,7 +3,7 @@ class Player {
     this.x = width / 2;
     this.y = height - 70;
     this.width = 50;
-    this.height = 30;
+    this.height = 50;
     this.size = 40;
 
     this._health = 100;
@@ -17,7 +17,6 @@ class Player {
 
     this.lastShot = 0;
 
-    // NEW
     this.weaponType = 'normal';
     this.enemiesKilled = 0;
     this.shotsFired = 0;
@@ -37,19 +36,9 @@ class Player {
   }
 
   display() {
-    // PLAYER SPRITE
-    switch (selectedSkin) {
-      case 'blue': fill(0, 0, 255); break;
-      case 'red': fill(255, 0, 0); break;
-      case 'gold': fill(255, 215, 0); break;
-      default: fill(0, 255, 0);
-    }
-
-    rect(this.x, this.y, this.width, this.height);
+    image(imgPlayerGreen, this.x, this.y, this.width, this.height);
 
     // === TOP-LEFT HUD ===
-
-    // HEALTH BAR
     fill(100);
     rect(20, 20, 200, 20);
     fill(lerpColor(color(255, 0, 0), color(0, 255, 0), this._health / this.maxHealth));
@@ -59,7 +48,6 @@ class Player {
     textAlign(LEFT, CENTER);
     text(`Health: ${this._health}`, 230, 30);
 
-    // SCORE BAR
     fill(50);
     rect(20, 50, 200, 10);
     fill(255, 215, 0);
@@ -68,7 +56,6 @@ class Player {
     textSize(14);
     text(`Score: ${score}`, 230, 55);
 
-    // === BOTTOM-LEFT PERKS ===
     let statusY = height - 100;
     textSize(16);
     textAlign(LEFT, TOP);

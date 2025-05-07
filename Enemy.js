@@ -10,7 +10,6 @@ class Enemy {
     this.direction = random() < 0.5 ? 1 : -1;
     this.size = 40;
 
-    // NEW: Smarter enemies
     this.shootCooldown = 90;
     this.lastShotFrame = frameCount;
   }
@@ -34,10 +33,9 @@ class Enemy {
 
   display() {
     switch (this.type) {
-      case 'fast': fill(255, 165, 0); break;
-      case 'zigzag': fill(186, 85, 211); break;
-      default: fill(255, 0, 0);
+      case 'fast': image(imgEnemyFast, this.x, this.y, this.size, this.size); break;
+      case 'zigzag': image(imgEnemyZigzag, this.x, this.y, this.size, this.size); break;
+      default: image(imgEnemyBasic, this.x, this.y, this.size, this.size);
     }
-    rect(this.x, this.y, this.size, this.size);
   }
 }
